@@ -32,7 +32,7 @@ public class InventoryServiceImpl implements InventoryService{
         Store store =null;
       
         try {
-            store = storeRepo.getById(storeId);
+            store = storeRepo.getReferenceById(storeId);
             Date date = new Date();
                inventory.setInventoryDate(date);
                inventory.setStore(store);
@@ -58,8 +58,8 @@ public class InventoryServiceImpl implements InventoryService{
          Inventory inv =null;
          Store store =null;
         try {
-            inv = inventoryRepo.getById(inventoryId);
-             store = storeRepo.getById(storeId);
+            inv = inventoryRepo.getReferenceById(inventoryId);
+             store = storeRepo.getReferenceById(storeId);
             inv.setInventoryName(inventory.getInventoryName());
             inv.setInventoryDate(inventory.getInventoryDate());
             inv.setStore(store);

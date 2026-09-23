@@ -30,7 +30,7 @@ private  OrderRepository orderRepo;
      
        Order order = null;
         try {
-            order = orderRepo.getById(orderId);
+            order = orderRepo.getReferenceById(orderId);
              orderPro.setOrder(order);
 //             order.getOrderProducts().add(orderPro);
             orderPro = orderProductRepo.save(orderPro);
@@ -52,7 +52,7 @@ private  OrderRepository orderRepo;
 
     @Override
     public OrderProduct editOrderProduct(Integer orderProductId, OrderProduct orderProduct) {
-        OrderProduct orderPro = orderProductRepo.getById(orderProductId);
+        OrderProduct orderPro = orderProductRepo.getReferenceById(orderProductId);
         try {
             
             orderPro.setOrderProductName(orderProduct.getOrderProductName());
