@@ -29,7 +29,7 @@ public class SuppliedProductServiceImpl implements SuppliedProductService {
         SaleOrder saleOrder = null;
 
         try {
-            saleOrder = saleOrderRepo.getById(slaOrderId);
+            saleOrder = saleOrderRepo.getReferenceById(slaOrderId);
             suppliedProduct.setSaleOrder(saleOrder);
             suppliedProduct.setSuppliedProductStatus("send");
             suppliedProduct = supProductRepo.save(suppliedProduct);
@@ -47,7 +47,7 @@ public class SuppliedProductServiceImpl implements SuppliedProductService {
 
     @Override
     public SuppliedProduct editSuppliedProduct(Integer suppliedProductId, SuppliedProduct suppliedProduct) {
-        SuppliedProduct supProduct = supProductRepo.getById(suppliedProductId);
+        SuppliedProduct supProduct = supProductRepo.getReferenceById(suppliedProductId);
         try {
             supProduct.setSuppliedProductName(suppliedProduct.getSuppliedProductName());
             supProduct.setSuppliedProductPrice(suppliedProduct.getSuppliedProductPrice());

@@ -56,7 +56,7 @@ public class BrandServiceImpl implements BrandService{
     public Brand editBrand(Integer brandId, Brand brandDetail) {
         Brand updatedBrand =null;
         try {
-             Brand brand = brandRepo.getById(brandId);
+             Brand brand = brandRepo.getReferenceById(brandId);
              brand.setBrandName(brandDetail.getBrandName());
              brand.setBrandDescription(brandDetail.getBrandDescription());
              updatedBrand = brandRepo.save(brand);

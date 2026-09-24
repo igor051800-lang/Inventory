@@ -39,7 +39,7 @@ private PasswordEncoder encoder;
     public User saveUser(Integer roleId,User user) {
         
 //        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-         Role role = roleDao.getById(roleId);
+         Role role = roleDao.getReferenceById(roleId);
           System.out.println(role);
         try {
          

@@ -35,7 +35,7 @@ public class RoleServiceImpl implements RoleService{
     public Role updateRole(Integer roleId, Role role) {
        Role rol = null;
         try {
-            rol = roleDao.getById(roleId);
+            rol = roleDao.getReferenceById(roleId);
             rol.setRoleName(role.getRoleName());
            rol  = roleDao.save(rol);
         } catch (Exception e) {
