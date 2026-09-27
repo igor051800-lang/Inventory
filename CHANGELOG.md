@@ -83,9 +83,9 @@ Migration from Java 8 + Spring Boot 2.6.4 to Java 21 + Spring Boot 3.3.13
   `getById(ID)` in favour of `getReferenceById(ID)`. The service layer still calls
   `getById`; it continues to work but emits deprecation warnings at compile time and
   should be migrated in a follow-up.
-- **JWT library** – `java-jwt` 4.x drops Java 8 support and changes some exception
-  types/packages; the token creation code in `CustomAuthenticationFilter` was
-  verified against 4.4.0.
+- **JWT library** – `java-jwt` 4.4.0 is used unchanged: the token creation
+  (`CustomAuthenticationFilter`) and verification (`UserController` `/api/checktoken`)
+  code only uses APIs that are the same in 4.x, and was verified end-to-end.
 - **Dialect** – MySQL dialect selection is now automatic. If you need to pin it,
   use `org.hibernate.dialect.MySQLDialect` (the versioned `MySQL8Dialect` class is
   deprecated in Hibernate 6).
