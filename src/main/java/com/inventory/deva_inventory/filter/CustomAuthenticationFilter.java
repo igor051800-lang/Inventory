@@ -12,10 +12,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,9 +31,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
  
-    private final  AuthenticationManager authenticationManager;
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager){
-        this.authenticationManager =authenticationManager;
+        super(authenticationManager);
     }
 
    
@@ -56,7 +55,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 //        throw new RuntimeException(ex);
 //        }
       
-return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     @Override
