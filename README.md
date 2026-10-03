@@ -38,7 +38,7 @@ To get the copy of this project in your computer,clone this repository or just d
 
 - Java Installed
 - Mysql installed
-- Java 8
+- Java 21
 
 ### Setup
 
