@@ -18,7 +18,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
@@ -38,19 +37,25 @@ private PasswordEncoder encoder;
     @Override
     public User saveUser(Integer roleId,User user) {
         
-//        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-         Role role = roleDao.getById(roleId);
-          System.out.println(role);
         try {
-         
+              Role role = roleDao.findById(roleId).orElse(null);
+              if (role == null || user.getUserName() == null || user.getUserName().isBlank()
+                      || user.getPassword() == null || user.getPassword().isEmpty()) {
+                  return null;
+              }
+              // The bootstrap (first) user must be an Admin, otherwise nobody could manage users afterwards.
+              if (!hasUsers() && !ADMIN_ROLE.equals(role.getRoleName())) {
+                  return null;
+              }
+              if (userDao.findByUserName(user.getUserName()) != null) {
+                  return null;
+              }
+              user.setUserId(null);
               user.setPassword(encoder.encode(user.getPassword()));
               user.setUserStatus("enabled");
-                user.addRole(role);
+              user.setRoles(null);
+              user.addRole(role);
               user = userDao.save(user);
-            
-            
-                 System.out.println(user);
-            
         } catch (Exception e) {
             user =null;
         }
@@ -76,6 +81,11 @@ private PasswordEncoder encoder;
         }
   return  listUser;
     }    
+
+    @Override
+    public boolean hasUsers() {
+        return userDao.count() > 0;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

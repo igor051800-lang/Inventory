@@ -7,6 +7,7 @@ package com.inventory.deva_inventory.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +43,7 @@ public class User implements Serializable{
     private  String email;
     @Column(name="user_name")
      private String userName;
+     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
      @Column(name="password")
      private String password;
      @Column(name="user_status")

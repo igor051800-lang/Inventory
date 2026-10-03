@@ -4,20 +4,19 @@
  */
 package com.inventory.deva_inventory.controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
 import com.inventory.deva_inventory.model.User;
 import com.inventory.deva_inventory.response.TokenResponse;
+import com.inventory.deva_inventory.security.JwtService;
 import com.inventory.deva_inventory.service.UserService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,15 +36,17 @@ public class UserController {
      
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
 
     
      
     @PostMapping("/users/{roleId}")
-       	@CrossOrigin(origins = "http://localhost:3000")
 public ResponseEntity<User>  saveUser(@PathVariable Integer roleId,@RequestBody User user){
       User  ur = userService.saveUser(roleId,user);
-        System.out.println(user.getFirstName());
-         System.out.println(roleId);
+        if (ur == null) {
+            return ResponseEntity.badRequest().build();
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add("Responded", "CategoryController");
         return ResponseEntity.accepted().headers(headers).body(ur);
@@ -75,19 +76,15 @@ public ResponseEntity<User>  saveUser(@PathVariable Integer roleId,@RequestBody 
 }
    @PostMapping("/checktoken/{token}")
  public  ResponseEntity<TokenResponse> validateToken(@PathVariable String  token){
-//                 System.out.print(token);
-                   TokenResponse tokenResponse = new TokenResponse();
-                    Algorithm algo = Algorithm.HMAC256("secret".getBytes());
-                    JWTVerifier verfier = JWT.require(algo).build();
-                    DecodedJWT decodedJwt = verfier.verify(token);
-                    String userName = decodedJwt.getSubject();
-                    String[] roles = decodedJwt.getClaim("roles").asArray(String.class);
-
-                     for(String role:roles){
-                         tokenResponse.setUserName(userName);
-                       tokenResponse.addRole(role);
-                         }
-
-                  return  ResponseEntity.ok().body(tokenResponse);
+        DecodedJWT decodedJwt;
+        try {
+            decodedJwt = jwtService.verifyAccessToken(token);
+        } catch (JWTVerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setUserName(decodedJwt.getSubject());
+        tokenResponse.setRoles(jwtService.getRoles(decodedJwt));
+        return  ResponseEntity.ok().body(tokenResponse);
  }
 }

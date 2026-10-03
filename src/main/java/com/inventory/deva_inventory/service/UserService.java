@@ -13,8 +13,11 @@ import java.util.List;
  * @author best
  */
 public interface UserService {
+    String ADMIN_ROLE = "Admin";
+
          public User saveUser ( Integer roleId ,User user);
     public User updatUser(Integer userId,User user);
     public  void    deleteUser(Integer userId);
     public  List<User> listUsers();
+    public boolean hasUsers();
 }

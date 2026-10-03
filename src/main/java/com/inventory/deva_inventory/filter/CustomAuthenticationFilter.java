@@ -4,14 +4,11 @@
  */
 package com.inventory.deva_inventory.filter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventory.deva_inventory.security.JwtService;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  *
@@ -32,54 +30,32 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
  
     private final  AuthenticationManager authenticationManager;
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager){
+    private final JwtService jwtService;
+
+    public CustomAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService){
         super(authenticationManager);
         this.authenticationManager =authenticationManager;
+        this.jwtService = jwtService;
+        setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login", "POST"));
     }
 
-   
-    
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
      String username = request.getParameter("userName");
      String password = request.getParameter("password");
-//        try {
-//            User creds = new ObjectMapper()
-//                    .readValue(request.getInputStream(), User.class);
-//               return authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(
-//                            creds.getUsername(),
-//                            creds.getPassword(),
-//                            new ArrayList<>())
-//            );
-//        } catch (IOException ex) {
-//           
-//        throw new RuntimeException(ex);
-//        }
-      
-return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+     return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+             username == null ? "" : username.trim(),
+             password == null ? "" : password));
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
             HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {
- User  user = (User)auth.getPrincipal();
-        Algorithm algo = Algorithm.HMAC256("secret".getBytes());
-         String access_token = JWT.create()
-                 .withSubject(user.getUsername())
-//                .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
-                 .withIssuer(request.getRequestURL().toString())
-                 .withClaim("roles",
-                  user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                  
-                 .sign(algo);
-         
-         String refresh_token = JWT.create()
-                 .withSubject(user.getUsername())
-//                .withExpiresAt(new Date(System.currentTimeMillis() + 60*60*1000))
-                 .withIssuer(request.getRequestURL().toString())
-                 .sign(algo);
-         
+        User user = (User) auth.getPrincipal();
+        String access_token = jwtService.createAccessToken(user.getUsername(),
+                user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
+        String refresh_token = jwtService.createRefreshToken(user.getUsername());
+
         response.setHeader("access_token", access_token);
         response.setHeader("refresh_token", refresh_token);
         Map<String,String> tokens = new HashMap<>();
@@ -87,11 +63,5 @@ return authenticationManager.authenticate(new UsernamePasswordAuthenticationToke
         tokens.put("refresh_token", refresh_token);
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
-                 
-    
     }
-    
-    
-    
-    
 }

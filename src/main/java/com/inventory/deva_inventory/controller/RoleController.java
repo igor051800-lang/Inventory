@@ -29,7 +29,6 @@ public class RoleController {
  public ResponseEntity<Role>  saveRole(@RequestBody Role role){
         Role rol = roleService.saveRole(role);
         HttpHeaders headers = new HttpHeaders();
-          System.out.println(role);
         headers.add("Responded", "CategoryController");
         return ResponseEntity.accepted().headers(headers).body(rol);
  }
