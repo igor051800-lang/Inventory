@@ -51,7 +51,6 @@ public class SupplierController {
     public ResponseEntity<Supplier> approveSupplier(@PathVariable Integer supplierId,
      @RequestBody Supplier sup){
          Supplier supplier = supplierService.approveSupplier(supplierId,sup);
-            System.out.println(supplierId);
          return ResponseEntity.ok().body(supplier);
     }
          @PutMapping("/suppliers/decline/{supplierId}")

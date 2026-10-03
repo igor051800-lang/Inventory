@@ -10,6 +10,7 @@ import com.inventory.deva_inventory.dao.SuppliedProductRepository;
 import com.inventory.deva_inventory.model.SaleOrder;
 import com.inventory.deva_inventory.model.SuppliedProduct;
 import com.inventory.deva_inventory.service.SuppliedProductService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,99 +26,61 @@ public class SuppliedProductServiceImpl implements SuppliedProductService {
     private OrderRepository orderRepo;
 
     @Override
-    public SuppliedProduct saveSuppliedProduct(Integer slaOrderId, SuppliedProduct suppliedProduct) {
-        SaleOrder saleOrder = null;
-
-        try {
-            saleOrder = saleOrderRepo.getById(slaOrderId);
-            suppliedProduct.setSaleOrder(saleOrder);
-            suppliedProduct.setSuppliedProductStatus("send");
-            suppliedProduct = supProductRepo.save(suppliedProduct);
-
-        } catch (Exception e) {
-            suppliedProduct = null;
-        }
-        return suppliedProduct;
+    public SuppliedProduct saveSuppliedProduct(Integer saleOrderId, SuppliedProduct suppliedProduct) {
+        SaleOrder saleOrder = saleOrderRepo.findById(saleOrderId)
+                .orElseThrow(() -> new ResourceNotFoundException("SaleOrder", "id", saleOrderId));
+        suppliedProduct.setSaleOrder(saleOrder);
+        suppliedProduct.setSuppliedProductStatus("send");
+        return supProductRepo.save(suppliedProduct);
     }
 
     @Override
     public void deleteSuppliedProduct(Integer suppliedProductId) {
+        if (!supProductRepo.existsById(suppliedProductId)) {
+            throw new ResourceNotFoundException("SuppliedProduct", "id", suppliedProductId);
+        }
         supProductRepo.deleteById(suppliedProductId);
     }
 
     @Override
     public SuppliedProduct editSuppliedProduct(Integer suppliedProductId, SuppliedProduct suppliedProduct) {
-        SuppliedProduct supProduct = supProductRepo.getById(suppliedProductId);
-        try {
-            supProduct.setSuppliedProductName(suppliedProduct.getSuppliedProductName());
-            supProduct.setSuppliedProductPrice(suppliedProduct.getSuppliedProductPrice());
-            supProduct.setSuppliedProductQuantity(suppliedProduct.getSuppliedProductQuantity());
-            supProduct = supProductRepo.save(supProduct);
-        } catch (Exception e) {
-            supProduct = null;
-        }
-        return supProduct;
+        SuppliedProduct supProduct = supProductRepo.findById(suppliedProductId)
+                .orElseThrow(() -> new ResourceNotFoundException("SuppliedProduct", "id", suppliedProductId));
+        supProduct.setSuppliedProductName(suppliedProduct.getSuppliedProductName());
+        supProduct.setSuppliedProductPrice(suppliedProduct.getSuppliedProductPrice());
+        supProduct.setSuppliedProductQuantity(suppliedProduct.getSuppliedProductQuantity());
+        return supProductRepo.save(supProduct);
     }
 
     @Override
     public List<SuppliedProduct> listAllSuppliedProduct() {
-        List<SuppliedProduct> supProduct = null;
-        try {
-            supProduct = supProductRepo.findAll();
-        } catch (Exception e) {
-            supProduct = null;
-        }
-
-        return supProduct;
+        return supProductRepo.findAll();
     }
 
     @Override
     public List<SuppliedProduct> listAllSuppliedProductBySaleOrderId(Integer saleOrderId) {
-        List<SuppliedProduct> supProduct = null;
-        try {
-            supProduct = supProductRepo.getAllSuppliedProductBySaleOrderId(saleOrderId);
-        } catch (Exception e) {
-            supProduct = null;
+        if (!saleOrderRepo.existsById(saleOrderId)) {
+            throw new ResourceNotFoundException("SaleOrder", "id", saleOrderId);
         }
-
-        return supProduct;
+        return supProductRepo.getAllSuppliedProductBySaleOrderId(saleOrderId);
     }
 
     @Override
-    public List<SuppliedProduct> listAllSuppliedProductByrderId(Integer orderId) {
-        List<SuppliedProduct> supProduct = null;
-        try {
-            supProduct = supProductRepo.getSuppliedProductByOrderId(orderId);
-        } catch (Exception e) {
-            supProduct = null;
+    public List<SuppliedProduct> listAllSuppliedProductByOrderId(Integer orderId) {
+        if (!orderRepo.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order", "id", orderId);
         }
-
-        return supProduct;
+        return supProductRepo.getSuppliedProductByOrderId(orderId);
     }
 
     @Override
     public List<SuppliedProduct> listAllSuppliedProductBySuppliedStatus() {
-       
-                List<SuppliedProduct> supProduct = null;
-                try {
-              supProduct = supProductRepo.getAllSupplieredProductStatus("send");
-        } catch (Exception e) {
-            supProduct =null;
-            
-        }
-    return supProduct;
+        return supProductRepo.getAllSuppliedProductByStatus("send");
     }
 
     @Override
     public List<SuppliedProduct> listAllSuppliedProductBySuppliedRecieved() {
-          List<SuppliedProduct> supProduct = null;
-                try {
-              supProduct = supProductRepo.getAllSupplieredProductStatus("recieved");
-        } catch (Exception e) {
-            supProduct =null;
-            
-        }
-    return supProduct;
+        return supProductRepo.getAllSuppliedProductByStatus("recieved");
     }
 
 }

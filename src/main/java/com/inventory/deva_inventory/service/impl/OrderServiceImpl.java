@@ -9,6 +9,7 @@ import com.inventory.deva_inventory.dao.SupplierRepository;
 import com.inventory.deva_inventory.model.Order;
 import com.inventory.deva_inventory.model.Supplier;
 import com.inventory.deva_inventory.service.OrderService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,75 +24,45 @@ public class OrderServiceImpl implements OrderService{
     private OrderRepository orderRepo;
     @Autowired
     private SupplierRepository supplierRepo;
+
     @Override
     public Order saveOrder(Integer supplierId,Order order) {
-        Supplier  sup =null;
-        try {
-            sup = supplierRepo.getById(supplierId);
-            System.out.print(sup.getSupplierName());
-               order.setSupplier(sup);
-//               sup.getOrder().setSupplier(sup);
-            
-            order = orderRepo.save(order);
-        } catch (Exception e) {
-            order =null;
-            
-        }
-        return order;
+        Supplier sup = supplierRepo.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", supplierId));
+        order.setSupplier(sup);
+        return orderRepo.save(order);
     }
 
     @Override
     public void deleteOrder(Integer orderId) {
-        try {
-            orderRepo.deleteById(orderId);
-        } catch (Exception e) {
+        if (!orderRepo.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order", "id", orderId);
         }
+        orderRepo.deleteById(orderId);
     }
 
     @Override
     public Order editOrder(Integer orderId, Order order) {
-        Order or = orderRepo.getById(orderId);
-        
-        try {
-             or.setOrderName(order.getOrderName());
-             or.setOrderType(order.getOrderType());
-             or.setDescription(order.getDescription());
-             or.setOrderNumber(order.getOrderNumber());
-             or  = orderRepo.save(or);
-            
-        } catch (Exception e) {
-            or=null;
-            
-        }
-        return or;
+        Order or = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+        or.setOrderName(order.getOrderName());
+        or.setOrderType(order.getOrderType());
+        or.setDescription(order.getDescription());
+        or.setOrderNumber(order.getOrderNumber());
+        return orderRepo.save(or);
     }
 
     @Override
     public List<Order> listAllOrder() {
-        List<Order> orderList =null;
-        try {
-            orderList = orderRepo.findAll();
-                    
-            
-        } catch (Exception e) {
-            orderList =null;
-                    
-        }
-        return orderList;
-        
+        return orderRepo.findAll();
     }
 
     @Override
     public List<Order> listAllOrderBySupplierId(Integer supplierId) {
-        List<Order> listOrder =null;
-
-        try {
-            listOrder = orderRepo.getOrderBySupplierId(supplierId);
-        } 
-        catch (Exception e) {
-            listOrder =null;
+        if (!supplierRepo.existsById(supplierId)) {
+            throw new ResourceNotFoundException("Supplier", "id", supplierId);
         }
-     return listOrder;
+        return orderRepo.getOrderBySupplierId(supplierId);
     }
-    
+
 }

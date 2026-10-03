@@ -7,8 +7,9 @@ package com.inventory.deva_inventory.dao;
 
 
 import com.inventory.deva_inventory.model.Company;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+
 
 import org.springframework.stereotype.Repository;
 
@@ -18,10 +19,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Integer>{
-    
-    @Query("SELECT c FROM Company c")
-    public Company  getcompany();
-    
-       
-
+    Optional<Company> findFirstByOrderByCompanyIdAsc();
 }

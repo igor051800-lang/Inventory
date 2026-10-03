@@ -41,7 +41,6 @@ public class StoreController {
   @PostMapping("/stores/{companyId}")
     public ResponseEntity<Store> saveStore(@PathVariable Integer companyId,@RequestBody Store storeData){
       Store store=  storeService.saveStore(companyId, storeData);
-      System.out.println(companyId);
         return  ResponseEntity.ok(store);
     }
     @PutMapping("/stores/{storeId}")
@@ -64,12 +63,7 @@ public class StoreController {
     }
     @PostMapping("/stores/address/{storeId}")
       public ResponseEntity<Address> saveStoreAddress(@PathVariable Integer storeId ,@RequestBody Address addressData){
-//          System.out.println(storeId);
      Address address = addressService.saveStoreAddress(storeId, addressData);
-               
-        if(address == null){
-            ResponseEntity.ok().body("error");
-        }
         return  ResponseEntity.ok().body(address);
     }
 }

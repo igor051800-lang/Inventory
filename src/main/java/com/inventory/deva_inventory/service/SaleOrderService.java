@@ -8,7 +8,7 @@ import java.util.List;
 public interface SaleOrderService {
     public SaleOrder saveSaleOrder(Integer  orderId, SaleOrder saleOrder);
     public  SaleOrder updateSaleOrder(Integer saleOrderId, SaleOrder sOrder);
-     public void  deleteSaleOrder(Integer slaeOrder);
+     public void  deleteSaleOrder(Integer saleOrderId);
       public List<SaleOrder> listSaleOrder();
       public SaleOrder listSaleOrderByOrder(Integer orderId);
       public List<SaleOrder> listAllSaleOrderBySupplier(Integer supplierId);

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SuppliedProductService {
 
-    public SuppliedProduct saveSuppliedProduct(Integer slaOrderId, SuppliedProduct suppliedProduct);
+    public SuppliedProduct saveSuppliedProduct(Integer saleOrderId, SuppliedProduct suppliedProduct);
 
     public void deleteSuppliedProduct(Integer suppliedProductId);
 
@@ -19,7 +19,7 @@ public interface SuppliedProductService {
 
     public List<SuppliedProduct> listAllSuppliedProductBySaleOrderId(Integer saleOrderId);
 
-    public List<SuppliedProduct> listAllSuppliedProductByrderId(Integer orderId);
+    public List<SuppliedProduct> listAllSuppliedProductByOrderId(Integer orderId);
     
     public List<SuppliedProduct> listAllSuppliedProductBySuppliedStatus();
         public List<SuppliedProduct> listAllSuppliedProductBySuppliedRecieved();

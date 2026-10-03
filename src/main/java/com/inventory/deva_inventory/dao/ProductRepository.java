@@ -28,7 +28,7 @@ public interface ProductRepository  extends  JpaRepository<Product, Integer>{
     @Query("SELECT p FROM Product p  JOIN  p.inventory inv  WHERE inv.inventoryId=:inventoryId")
     List<Product> getAllProductByInventory(@Param (value = "inventoryId") Integer inventoryId);
     @Query("SELECT p FROM Product p   WHERE p.productNumber=:productNumber ")
-    Product getProductbyProductNumner(@Param (value = "productNumber")String productNumber);
+    Product getProductByProductNumber(@Param (value = "productNumber")String productNumber);
    @Query("SELECT p FROM Product p    WHERE p.stockStatus=:stockStatus")
     List<Product> getAllProductByStockStatus(@Param (value = "stockStatus") String stockStatus);
    

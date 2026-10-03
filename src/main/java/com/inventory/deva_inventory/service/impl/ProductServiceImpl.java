@@ -15,15 +15,16 @@ import com.inventory.deva_inventory.dao.SupplierRepository;
 import com.inventory.deva_inventory.model.Brand;
 import com.inventory.deva_inventory.model.Category;
 import com.inventory.deva_inventory.model.Inventory;
-import com.inventory.deva_inventory.model.Order;
 import com.inventory.deva_inventory.model.Product;
 import com.inventory.deva_inventory.model.SuppliedProduct;
 import com.inventory.deva_inventory.model.Supplier;
 import com.inventory.deva_inventory.service.ProductService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -46,163 +47,117 @@ public class ProductServiceImpl implements ProductService{
     private BrandRepository brandRepo;
     @Autowired
     private InventoryRepository invRepo;
-    
+
+    @Transactional
     @Override
     public Product saveProduct(Integer supplierId, Integer suppliedProductId,
             Integer categoryId, Integer brandId,Product  product) {
-        
-    
-          Product prod =null;
-         Supplier sup =null;
-         SuppliedProduct suppliedProduct=null;
-         Category cat =null;
-         Brand brand =null;
-        
-        try {
-            Date date = new Date();
-            suppliedProduct = supProductRepository.getById(suppliedProductId);
-            suppliedProduct.setSuppliedProductStatus("recieved");
-            suppliedProduct = supProductRepository.save(suppliedProduct);
-            cat = catRepo.getById(categoryId);
-            brand = brandRepo.getById(brandId);
-            sup = supplierRepo.getById(supplierId);
-            product.setSupProduct(suppliedProduct);
-            product.setRecievedDate(date);
-            product.setSupplier(sup);
-            product.setCategory(cat);
-            product.setBrand(brand);
-            product.setStockStatus("un-stocked");
-            prod = productRepo.save(product);
-            
-        } catch (Exception e) {
-            prod =null;
-        }
-        return prod;
+        SuppliedProduct suppliedProduct = supProductRepository.findById(suppliedProductId)
+                .orElseThrow(() -> new ResourceNotFoundException("SuppliedProduct", "id", suppliedProductId));
+        Category cat = catRepo.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+        Brand brand = brandRepo.findById(brandId)
+                .orElseThrow(() -> new ResourceNotFoundException("Brand", "id", brandId));
+        Supplier sup = supplierRepo.findById(supplierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", supplierId));
+
+        suppliedProduct.setSuppliedProductStatus("recieved");
+        suppliedProduct = supProductRepository.save(suppliedProduct);
+        product.setSupProduct(suppliedProduct);
+        product.setRecievedDate(new Date());
+        product.setSupplier(sup);
+        product.setCategory(cat);
+        product.setBrand(brand);
+        product.setStockStatus("un-stocked");
+        return productRepo.save(product);
     }
 
     @Override
-    public void deleteProduct(Integer orderProductId) {
-        try {
-            productRepo.deleteById(orderProductId);
-        } catch (Exception e) {
+    public void deleteProduct(Integer productId) {
+        if (!productRepo.existsById(productId)) {
+            throw new ResourceNotFoundException("Product", "id", productId);
         }
-     
-        
+        productRepo.deleteById(productId);
     }
 
     @Override
     public Product editProduct(Integer productId, Product product) {
-      Product prod =null;
-        try {
-            Date date  = new Date();
-            prod = productRepo.getById(productId);
-            prod.setProductNumber(product.getProductNumber());
-            prod.setProductName(product.getProductName());
-            prod.setProductQuantity(product.getProductQuantity());
-            prod.setProductPrice(product.getProductPrice());
-            prod.setRecievedDate(date);
-            prod.setExpiryDate(product.getExpiryDate());
-            prod = productRepo.save(prod);
-        } catch (Exception e) {
-        prod =null;
-        }
-        return prod;
+        Product prod = findProduct(productId);
+        prod.setProductNumber(product.getProductNumber());
+        prod.setProductName(product.getProductName());
+        prod.setProductQuantity(product.getProductQuantity());
+        prod.setProductPrice(product.getProductPrice());
+        prod.setRecievedDate(new Date());
+        prod.setExpiryDate(product.getExpiryDate());
+        return productRepo.save(prod);
     }
 
     @Override
     public List<Product> listAllProduct() {
-        List<Product> listPro;
-        
-        try {
-             listPro = productRepo.findAll();
-        } catch (Exception e) {
-            listPro =null;
-        }
-        return listPro;
+        return productRepo.findAll();
     }
 
     @Override
     public List<Product> listAllProductById(Integer orderId) {
-      List<Product> listPro =null;
-        try {
-            listPro = productRepo.getAllProductByOrderId(orderId);
-        } catch (Exception e) {
-            listPro =null;
+        if (!orderRepo.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order", "id", orderId);
         }
-        return listPro;
+        return productRepo.getAllProductByOrderId(orderId);
     }
 
     @Override
     public List<Product> listAllProductByCategoryId(Integer categoryId) {
-     List<Product> listPro =null;
-        try {
-            listPro = productRepo.getAllProductByCategory(categoryId);
-        } catch (Exception e) {
-            listPro =null;
+        if (!catRepo.existsById(categoryId)) {
+            throw new ResourceNotFoundException("Category", "id", categoryId);
         }
-        return listPro;
+        return productRepo.getAllProductByCategory(categoryId);
     }
 
     @Override
     public List<Product> listAllProductByBrandId(Integer brandId) {
-         List<Product> listPro =null;
-        try {
-            listPro = productRepo.getAllProductByBrand(brandId);
-        } catch (Exception e) {
-            listPro =null;
+        if (!brandRepo.existsById(brandId)) {
+            throw new ResourceNotFoundException("Brand", "id", brandId);
         }
-        return listPro;    }
+        return productRepo.getAllProductByBrand(brandId);
+    }
 
     @Override
     public Product getProductByProductNumber(String productNumber) {
-         Product pro =null;
-        try {
-            pro = productRepo.getProductbyProductNumner(productNumber);
-        } catch (Exception e) {
-            pro =null;
+        Product pro = productRepo.getProductByProductNumber(productNumber);
+        if (pro == null) {
+            throw new ResourceNotFoundException("Product", "productNumber", productNumber);
         }
-        return pro; 
+        return pro;
     }
 
     @Override
     public List<Product> listAllProductByProductStockStatus(String stockStatus) {
-     List<Product> listPro =null;
-        try {
-            listPro = productRepo.getAllProductByStockStatus(stockStatus);
-        } catch (Exception e) {
-            listPro =null;
-        }
-        return listPro;  
-    
+        return productRepo.getAllProductByStockStatus(stockStatus);
     }
 
     @Override
     public Product addProductToInventory(Integer productId, String inventoryCode) {
-            Product pro =null;
-            Inventory inv =null;
-        try {
-            inv = invRepo.getInventoryByInventoryCode(inventoryCode);
-            pro = productRepo.getById(productId);
-            pro.setInventory(inv);
-            pro.setStockStatus("stocked");
-            pro = productRepo.save(pro);
-        } catch (Exception e) {
-            pro =null;
+        Inventory inv = invRepo.getInventoryByInventoryCode(inventoryCode);
+        if (inv == null) {
+            throw new ResourceNotFoundException("Inventory", "inventoryCode", inventoryCode);
         }
-        return pro; 
-
+        Product pro = findProduct(productId);
+        pro.setInventory(inv);
+        pro.setStockStatus("stocked");
+        return productRepo.save(pro);
     }
 
     @Override
     public List<Product> listProductByInventory(Integer inventoryId) {
-       List<Product> listPro =null;
-        try {
-            listPro = productRepo.getAllProductByInventory(inventoryId);
-        } catch (Exception e) {
-            listPro =null;
+        if (!invRepo.existsById(inventoryId)) {
+            throw new ResourceNotFoundException("Inventory", "id", inventoryId);
         }
-        return listPro;      
-    
+        return productRepo.getAllProductByInventory(inventoryId);
     }
-    
+
+    private Product findProduct(Integer productId) {
+        return productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+    }
+
 }

@@ -35,7 +35,6 @@ public class OrderProductController {
     @PostMapping("/order-products/{orderId}")
    public ResponseEntity<OrderProduct> saveOrderProduct(@PathVariable Integer orderId ,@RequestBody OrderProduct orderProData){ 
                 OrderProduct orderPro = orderProductService.saveOrderProduct(orderId, orderProData);
-              System.out.println(orderId);
         return  ResponseEntity.ok().body(orderPro);
     }
     @PutMapping("/order-products/{orderProductId}")

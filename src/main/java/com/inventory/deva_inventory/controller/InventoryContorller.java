@@ -5,7 +5,6 @@
 package com.inventory.deva_inventory.controller;
 
 import com.inventory.deva_inventory.model.Inventory;
-import com.inventory.deva_inventory.model.OrderProduct;
 import com.inventory.deva_inventory.service.InventoryService;
 import java.util.HashMap;
 import java.util.List;

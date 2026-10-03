@@ -10,6 +10,7 @@ import com.inventory.deva_inventory.dao.StoreRepository;
 import com.inventory.deva_inventory.model.Company;
 import com.inventory.deva_inventory.model.Store;
 import com.inventory.deva_inventory.service.StoreService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,57 +25,38 @@ public class StoreServiceImpl implements StoreService{
  private StoreRepository storeRepo;
     @Autowired
    private CompanyRepository compRepo;
+
     @Override
     public Store saveStore(Integer companyId,Store storeData) {
-      
-        try {
-            Company comp = compRepo.getById(companyId);
-         
-//            
-               storeData.setCompany(comp);
-//                comp.getStore().add(storeData);
-               storeData= storeRepo.save(storeData);
-        } catch (Exception e) {
-        }
-        return  storeData;
+        Company comp = compRepo.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company", "id", companyId));
+        storeData.setCompany(comp);
+        return storeRepo.save(storeData);
     }
 
     @Override
     public Store updateStore(Integer storeId, Store storeData) {
-        Store updateStore =null;
-        try {
-            Store store=null;
-            store = storeRepo.getById(storeId);
-            store.setStoreName(storeData.getStoreName());
-            store.setStoreSize(storeData.getStoreSize());
-            store.setBuilding(storeData.getBuilding());
-            store.setFloor(storeData.getFloor());
-            store.setRoom(storeData.getRoom());
-        updateStore=    storeRepo.save(store);
-        } catch (Exception e) {
-           updateStore=null;
-        }
-        return updateStore;
+        Store store = storeRepo.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store", "id", storeId));
+        store.setStoreName(storeData.getStoreName());
+        store.setStoreSize(storeData.getStoreSize());
+        store.setBuilding(storeData.getBuilding());
+        store.setFloor(storeData.getFloor());
+        store.setRoom(storeData.getRoom());
+        return storeRepo.save(store);
     }
 
     @Override
     public List<Store> getAllStores() {
-        List<Store> listStore =null;
-        try {
-            listStore = storeRepo.findAll();
-        } catch (Exception e) {
-            listStore =null;
-            
-        }
-        return listStore;
+        return storeRepo.findAll();
     }
 
     @Override
     public void deleteStore(Integer storeId) {
-        try {
-            storeRepo.deleteById(storeId);
-        } catch (Exception e) {
+        if (!storeRepo.existsById(storeId)) {
+            throw new ResourceNotFoundException("Store", "id", storeId);
         }
+        storeRepo.deleteById(storeId);
     }
-    
+
 }

@@ -24,5 +24,5 @@ public interface SuppliedProductRepository  extends JpaRepository<SuppliedProduc
  List<SuppliedProduct> getSuppliedProductByOrderId(@Param (value ="orderId") Integer orderId); 
 
  @Query("SELECT sp FROM SuppliedProduct sp   WHERE sp.suppliedProductStatus =:suppliedProductStatus")
- List<SuppliedProduct>  getAllSupplieredProductStatus(@Param (value ="suppliedProductStatus") String suppliedProductStatus);
+ List<SuppliedProduct>  getAllSuppliedProductByStatus(@Param (value ="suppliedProductStatus") String suppliedProductStatus);
 }

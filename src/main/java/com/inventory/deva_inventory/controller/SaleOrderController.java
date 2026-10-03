@@ -1,7 +1,6 @@
 
 package com.inventory.deva_inventory.controller;
 
-import com.inventory.deva_inventory.model.Product;
 import com.inventory.deva_inventory.model.SaleOrder;
 import com.inventory.deva_inventory.model.Supplier;
 import com.inventory.deva_inventory.service.SaleOrderService;

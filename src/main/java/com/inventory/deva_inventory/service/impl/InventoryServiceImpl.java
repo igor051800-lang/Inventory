@@ -10,6 +10,7 @@ import com.inventory.deva_inventory.dao.StoreRepository;
 import com.inventory.deva_inventory.model.Inventory;
 import com.inventory.deva_inventory.model.Store;
 import com.inventory.deva_inventory.service.InventoryService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.Date;
 
 import java.util.List;
@@ -25,115 +26,70 @@ public class InventoryServiceImpl implements InventoryService{
     private InventoryRepository inventoryRepo;
     @Autowired
     private StoreRepository storeRepo;
-    
+
     @Override
     public Inventory saveInventory(Integer storeId, Inventory inventory) {
-        
-        Store store =null;
-      
-        try {
-            store = storeRepo.getById(storeId);
-            Date date = new Date();
-               inventory.setInventoryDate(date);
-               inventory.setStore(store);
-               inventory = inventoryRepo.save(inventory);
-            
-        } catch (Exception e) {
-            inventory =null;
-        }
-        return inventory;
+        Store store = findStore(storeId);
+        inventory.setInventoryDate(new Date());
+        inventory.setStore(store);
+        return inventoryRepo.save(inventory);
     }
 
     @Override
     public void deleteInventory(Integer inventoryId) {
-        try {
-             inventoryRepo.deleteById(inventoryId);
-        } catch (Exception e) {
+        if (!inventoryRepo.existsById(inventoryId)) {
+            throw new ResourceNotFoundException("Inventory", "id", inventoryId);
         }
+        inventoryRepo.deleteById(inventoryId);
     }
 
     @Override
     public Inventory editInventory(Integer inventoryId,Integer storeId,Inventory inventory) {
-       
-         Inventory inv =null;
-         Store store =null;
-        try {
-            inv = inventoryRepo.getById(inventoryId);
-             store = storeRepo.getById(storeId);
-            inv.setInventoryName(inventory.getInventoryName());
-            inv.setInventoryDate(inventory.getInventoryDate());
-            inv.setStore(store);
-            
-            inv = inventoryRepo.save(inv);
-        } catch (Exception e) {
-            inv =null;
+        Inventory inv = inventoryRepo.findById(inventoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "id", inventoryId));
+        Store store = findStore(storeId);
+        inv.setInventoryName(inventory.getInventoryName());
+        inv.setInventoryDate(inventory.getInventoryDate());
+        inv.setStore(store);
+        return inventoryRepo.save(inv);
+    }
+
+    @Override
+    public List<Inventory> listAllInventorys() {
+        return inventoryRepo.findAll();
+    }
+
+    @Transactional
+    @Override
+    public List<Inventory> listAllInventorysByStoreId(Integer storeId) {
+        if (!storeRepo.existsById(storeId)) {
+            throw new ResourceNotFoundException("Store", "id", storeId);
+        }
+        return inventoryRepo.getAllInventoryByStoreId(storeId);
+    }
+
+    @Override
+    public Inventory findInventoryByInventoryCode(String inventoryCode) {
+        Inventory inv = inventoryRepo.getInventoryByInventoryCode(inventoryCode);
+        if (inv == null) {
+            throw new ResourceNotFoundException("Inventory", "inventoryCode", inventoryCode);
         }
         return inv;
     }
 
     @Override
-    public List<Inventory> listAllInventorys() {
-         List<Inventory> listInventory =null;
-        try {
-             listInventory = inventoryRepo.findAll();
-        } catch (Exception e) {
-            listInventory = null;
-        }
-        return listInventory;
-    }
-@Transactional
-    @Override
-    public List<Inventory> listAllInventorysByStoreId(Integer storeId) {
-       List<Inventory> listInventory =null;
-       
-        try {
-             listInventory = inventoryRepo.getAllInventoryByStoreId(storeId);
-        } catch (Exception e) {
-            
-            listInventory  =null;
-        }
-       
-        return listInventory;
-
-    }
-
-    @Override
-    public Inventory findInventoryByInventoryCode(String inventoryCode) {
-        Inventory inv =null;
-        try {
-            inv = inventoryRepo.getInventoryByInventoryCode(inventoryCode);
-        } catch (Exception e) {
-            inv= null;
-        }
-    return inv;
-    }
-
-    @Override
     public List<Inventory> findInventoryByReorderLevel(Integer reorderLevel) {
-         List<Inventory> listInventory =null;
-       
-        try {
-             listInventory = inventoryRepo.getInventoryByReorderLevel(reorderLevel);
-        } catch (Exception e) {
-            
-            listInventory  =null;
-        }
-       
-        return listInventory;
+        return inventoryRepo.getInventoryByReorderLevel(reorderLevel);
     }
 
     @Override
     public List<Inventory> findInventoryByAlertLevel(Integer alertLevel) {
- 
-           List<Inventory> listInventory =null;
-       
-        try {
-             listInventory = inventoryRepo.getInventoryByAlertLevel(alertLevel);
-        } catch (Exception e) {
-            
-            listInventory  =null;
-        }
-       
-        return listInventory;}
-    
+        return inventoryRepo.getInventoryByAlertLevel(alertLevel);
+    }
+
+    private Store findStore(Integer storeId) {
+        return storeRepo.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store", "id", storeId));
+    }
+
 }

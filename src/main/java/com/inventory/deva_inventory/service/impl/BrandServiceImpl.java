@@ -8,6 +8,7 @@ package com.inventory.deva_inventory.service.impl;
 import com.inventory.deva_inventory.dao.BrandRepository;
 import com.inventory.deva_inventory.model.Brand;
 import com.inventory.deva_inventory.service.BrandService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,65 +19,48 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class BrandServiceImpl implements BrandService{
- 
+
     @Autowired
     private BrandRepository brandRepo;
+
     @Override
     public Brand findBrandById(Integer brandId) {
-        return null;
-        }
+        return brandRepo.findById(brandId)
+                .orElseThrow(() -> new ResourceNotFoundException("Brand", "id", brandId));
+    }
 
     @Override
     public Brand findBrandByName(String brandName) {
-      return null;  
+        Brand brand = brandRepo.findByBrandName(brandName);
+        if (brand == null) {
+            throw new ResourceNotFoundException("Brand", "brandName", brandName);
+        }
+        return brand;
     }
 
     @Override
     public Brand saveBrand(Brand brandData) {
-      Brand brand=null;
-        try {
-             brand = brandRepo.save(brandData);
-            
-        } catch (Exception e) {
-            brand = null;
-        }
-        return  brand;      
-                }
+        return brandRepo.save(brandData);
+    }
 
     @Override
     public void deleteBrand(Integer brandId) {
-        try {
-            brandRepo.deleteById(brandId);
-        } catch (Exception e) {
-            
+        if (!brandRepo.existsById(brandId)) {
+            throw new ResourceNotFoundException("Brand", "id", brandId);
         }
+        brandRepo.deleteById(brandId);
     }
 
     @Override
     public Brand editBrand(Integer brandId, Brand brandDetail) {
-        Brand updatedBrand =null;
-        try {
-             Brand brand = brandRepo.getById(brandId);
-             brand.setBrandName(brandDetail.getBrandName());
-             brand.setBrandDescription(brandDetail.getBrandDescription());
-             updatedBrand = brandRepo.save(brand);
-        } catch (Exception e) {
-            updatedBrand =null;
-        }
-        return updatedBrand;
+        Brand brand = findBrandById(brandId);
+        brand.setBrandName(brandDetail.getBrandName());
+        brand.setBrandDescription(brandDetail.getBrandDescription());
+        return brandRepo.save(brand);
     }
 
     @Override
     public List<Brand> listAllBrand() {
-         
-      List<Brand> brandList  =null;
-        try {
-            brandList =brandRepo.findAll();
-        } catch (Exception e) {
-            brandList =null;
-        }
-        
-return brandList;
-        
+        return brandRepo.findAll();
     }
 }

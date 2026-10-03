@@ -12,10 +12,12 @@ import com.inventory.deva_inventory.model.Role;
 import com.inventory.deva_inventory.model.Supplier;
 import com.inventory.deva_inventory.model.User;
 import com.inventory.deva_inventory.service.SupplierService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -32,110 +34,82 @@ public class SupplierServiceImpl implements SupplierService{
     private  UserRepository userDao;
         @Autowired
 private PasswordEncoder encoder;
+
     @Override
     public Supplier saveSupplier(Supplier sup) {
-        try {
-            sup.setSupplierStatus("waiting");
-            sup = supRepo.save(sup);
-        } catch (Exception e) {
-        }
-        return sup;
+        sup.setSupplierStatus("waiting");
+        return supRepo.save(sup);
     }
 
     @Override
     public Supplier updateSupplier(Integer supId, Supplier sup) {
-          Supplier supplier = supRepo.getById(supId);
-        try {
-          
-            supplier.setSupplierName(sup.getSupplierName());
-            supplier.setEmail(sup.getEmail());
-            supplier.setPhone1(sup.getPhone1());
-            supplier.setPhone2(sup.getPhone2());
-            
-            supplier = supRepo.save(supplier);
-            
-            
-        } catch (Exception e) {
-            supplier=  null;
-        }
-        return supplier;
+        Supplier supplier = findSupplier(supId);
+        supplier.setSupplierName(sup.getSupplierName());
+        supplier.setEmail(sup.getEmail());
+        supplier.setPhone1(sup.getPhone1());
+        supplier.setPhone2(sup.getPhone2());
+        return supRepo.save(supplier);
     }
 
     @Override
     public void deleteSupplier(Integer supId) {
-        try {
-            supRepo.deleteById(supId);
-        } catch (Exception e) {
+        if (!supRepo.existsById(supId)) {
+            throw new ResourceNotFoundException("Supplier", "id", supId);
         }
+        supRepo.deleteById(supId);
     }
 
     @Override
     public List<Supplier> getAllSupplier() {
-        List<Supplier> supList = null;
-        try {
-            supList= supRepo.findAll();
-        } catch (Exception e) {
-            supList =null;
-        }
-        return supList;
-                
+        return supRepo.findAll();
     }
 
     @Override
     public Supplier changeSupplierStatus(Integer supId, String supplierStatus) {
-        Supplier sup = supRepo.getById(supId);
-        try {
-            sup.setSupplierStatus(supplierStatus);
-            sup = supRepo.save(sup);
-        } catch (Exception e) {
-            sup = null;
-        }
-        return sup;
+        Supplier sup = findSupplier(supId);
+        sup.setSupplierStatus(supplierStatus);
+        return supRepo.save(sup);
     }
 
+    @Transactional
     @Override
     public Supplier approveSupplier(Integer supId ,Supplier sup) {
-        Supplier supplier =null;
-        Role role =null;
-        User user =new User();
-        try {
-            supplier = supRepo.getById(supId);
-            role = roleRepo.findByRoleName("Supplier");
-            supplier.setSupplierStatus("approved");
-            supplier = supRepo.save(supplier);
-            user.setSupplier(supplier);
-            user.addRole(role);
-            user.setUserName(sup.getUserName());
-            user.setPassword(encoder.encode(sup.getPassword()));
-            user.setUserStatus("enabled");
-            user = userDao.save(user);
-        } catch (Exception e) {
+        Supplier supplier = findSupplier(supId);
+        Role role = roleRepo.findByRoleName("Supplier");
+        if (role == null) {
+            throw new ResourceNotFoundException("Role", "roleName", "Supplier");
         }
-     return sup;
+        supplier.setSupplierStatus("approved");
+        supplier = supRepo.save(supplier);
+        User user = new User();
+        user.setSupplier(supplier);
+        user.addRole(role);
+        user.setUserName(sup.getUserName());
+        user.setPassword(encoder.encode(sup.getPassword()));
+        user.setUserStatus("enabled");
+        userDao.save(user);
+        return supplier;
     }
 
     @Override
     public Supplier declineSupplier(Integer supId) {
-       Supplier sup =null;
-        try {
-            sup = supRepo.getById(supId);
-            sup.setSupplierStatus("decline");
-            sup = supRepo.save(sup);
-        } catch (Exception e) {
-        }
-     return sup;
+        Supplier sup = findSupplier(supId);
+        sup.setSupplierStatus("decline");
+        return supRepo.save(sup);
     }
 
     @Override
     public Supplier findSupplierByUser(String userName) {
-        Supplier sup =null;
-        try {
-            sup = supRepo.getSupplierByUserName(userName);
-        } catch (Exception e) {
-            sup =null;
+        Supplier sup = supRepo.getSupplierByUserName(userName);
+        if (sup == null) {
+            throw new ResourceNotFoundException("Supplier", "userName", userName);
         }
-    
-    return sup;
+        return sup;
     }
-    
+
+    private Supplier findSupplier(Integer supId) {
+        return supRepo.findById(supId)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", supId));
+    }
+
 }

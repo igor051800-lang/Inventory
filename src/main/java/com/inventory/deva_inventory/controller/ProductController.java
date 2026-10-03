@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,13 +63,13 @@ public class ProductController {
         return ResponseEntity.ok().body(listPro);
     }
        @GetMapping("/products/{orderId}")
-    public ResponseEntity<List<Product>>  getAllProductsByCategory(@PathVariable Integer orderId){
+    public ResponseEntity<List<Product>>  getAllProductsByOrderId(@PathVariable Integer orderId){
        
          List<Product> listPro = prodService.listAllProductById(orderId);
         return ResponseEntity.ok().body(listPro);
     }
         @GetMapping("/products/category/{categoryId}")
-    public ResponseEntity<List<Product>> getAllProductsByOrderId(@PathVariable Integer categoryId){
+    public ResponseEntity<List<Product>> getAllProductsByCategoryId(@PathVariable Integer categoryId){
        
          List<Product> listPro = prodService.listAllProductByCategoryId(categoryId);
         return ResponseEntity.ok().body(listPro);
@@ -83,7 +82,7 @@ public class ProductController {
     }
     
      @GetMapping("/products/product-number/{productNumber}")
-    public ResponseEntity<Product> getAllProductsByProductNumber(@PathVariable String productNumber){
+    public ResponseEntity<Product> getProductByProductNumber(@PathVariable String productNumber){
        
          Product pro = prodService.getProductByProductNumber(productNumber);
         return ResponseEntity.ok().body(pro);
@@ -100,7 +99,6 @@ public class ProductController {
        @PutMapping("/products/add-product-inventory/{productId}/{inventoryCode}")
     public ResponseEntity<Product>  addProductToInventory(@PathVariable Integer productId,
             @PathVariable String inventoryCode){
-           System.out.println(productId + "this " + inventoryCode);
          Product pro = prodService.addProductToInventory(productId, inventoryCode);
         return ResponseEntity.ok().body(pro);
     }

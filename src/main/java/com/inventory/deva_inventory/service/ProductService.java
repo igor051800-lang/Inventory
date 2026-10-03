@@ -15,7 +15,7 @@ import java.util.List;
 public interface ProductService {
      public Product   saveProduct(Integer supplierId, Integer suppliedProductId,Integer categoryId
              ,Integer brandId,Product  product);
-     public void deleteProduct  ( Integer orderProductId);
+     public void deleteProduct  ( Integer productId);
      public Product   editProduct  (Integer productId,Product   product);
      public List<Product > listAllProduct  ();
      public List<Product > listAllProductById  (Integer orderId);

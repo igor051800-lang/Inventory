@@ -32,10 +32,10 @@ public class SuppliedProductController {
            SuppliedProduct supProduct = supProductService.saveSuppliedProduct(saleOrderId, supProData);
         return  ResponseEntity.ok().body(supProduct);
     }
-    @PutMapping("/supplied-products/{saleOrderId}")
-    public ResponseEntity<SuppliedProduct> updateSuppliedProduct(@PathVariable Integer saleOrderId,@RequestBody SuppliedProduct supProduct){
+    @PutMapping("/supplied-products/{suppliedProductId}")
+    public ResponseEntity<SuppliedProduct> updateSuppliedProduct(@PathVariable Integer suppliedProductId,@RequestBody SuppliedProduct supProduct){
         
-         SuppliedProduct suppliedProduct = supProductService.editSuppliedProduct(saleOrderId, supProduct);
+         SuppliedProduct suppliedProduct = supProductService.editSuppliedProduct(suppliedProductId, supProduct);
         return ResponseEntity.ok().body(suppliedProduct);
     }
     @GetMapping("/supplied-products")
@@ -53,7 +53,7 @@ public class SuppliedProductController {
        @GetMapping("/supplied-products/order/{orderId}")
     public ResponseEntity<List<SuppliedProduct>> getAllSuppliedProductsByOrderId(@PathVariable Integer orderId){
        
-         List<SuppliedProduct> listSuppliedPro = supProductService.listAllSuppliedProductByrderId(orderId);
+         List<SuppliedProduct> listSuppliedPro = supProductService.listAllSuppliedProductByOrderId(orderId);
         return ResponseEntity.ok().body(listSuppliedPro);
     }
         @GetMapping("/supplied-products/send")

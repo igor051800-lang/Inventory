@@ -9,6 +9,7 @@ import com.inventory.deva_inventory.dao.OrderRepository;
 import com.inventory.deva_inventory.model.Order;
 import com.inventory.deva_inventory.model.OrderProduct;
 import com.inventory.deva_inventory.service.OrderProductService;
+import com.inventory.deva_inventory.service.exception.ResourceNotFoundException;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,67 +26,45 @@ public class OrderProductServiceImpl implements OrderProductService{
 private OrderProductRepository orderProductRepo;
 @Autowired 
 private  OrderRepository orderRepo;
+
     @Override
     public OrderProduct saveOrderProduct( Integer orderId, OrderProduct orderPro) {
-     
-       Order order = null;
-        try {
-            order = orderRepo.getById(orderId);
-             orderPro.setOrder(order);
-//             order.getOrderProducts().add(orderPro);
-            orderPro = orderProductRepo.save(orderPro);
-        } catch (Exception e) {
-            orderPro =null;
-        }
-        return  orderPro;
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+        orderPro.setOrder(order);
+        return orderProductRepo.save(orderPro);
     }
 
     @Override
     public void deleteOrderProduct(Integer orderProductId) {
-      
-        try {
-            orderProductRepo.deleteById(orderProductId);
-        } catch (Exception e) {
+        if (!orderProductRepo.existsById(orderProductId)) {
+            throw new ResourceNotFoundException("OrderProduct", "id", orderProductId);
         }
-            
+        orderProductRepo.deleteById(orderProductId);
     }
 
     @Override
     public OrderProduct editOrderProduct(Integer orderProductId, OrderProduct orderProduct) {
-        OrderProduct orderPro = orderProductRepo.getById(orderProductId);
-        try {
-            
-            orderPro.setOrderProductName(orderProduct.getOrderProductName());
-            orderPro.setOrderProductQuantity(orderProduct.getOrderProductId());
-            orderPro.setOrderProductPrice(orderProduct.getOrderProductPrice());
-        } catch (Exception e) {
-            orderPro =null;
-        }
-        return  orderPro;
+        OrderProduct orderPro = orderProductRepo.findById(orderProductId)
+                .orElseThrow(() -> new ResourceNotFoundException("OrderProduct", "id", orderProductId));
+        orderPro.setOrderProductName(orderProduct.getOrderProductName());
+        orderPro.setOrderProductQuantity(orderProduct.getOrderProductQuantity());
+        orderPro.setOrderProductPrice(orderProduct.getOrderProductPrice());
+        return orderProductRepo.save(orderPro);
     }
 
     @Override
     public List<OrderProduct> listAllOrderProduct() {
-        List<OrderProduct>  listOrderProduct =null;
-        try {
-            listOrderProduct = orderProductRepo.findAll();
-        } catch (Exception e) {
-            listOrderProduct =null;
-        }
-        return listOrderProduct;
+        return orderProductRepo.findAll();
     }
 
     @Transactional
     @Override
     public List<OrderProduct> listAllOrderProductById(Integer orderId) {
-        List<OrderProduct> listOrderPro = null;
-        try {
-           listOrderPro = orderProductRepo.getAllProductById(orderId);
-           
-        } catch (Exception e) {
-            listOrderPro =null;
+        if (!orderRepo.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order", "id", orderId);
         }
-        return listOrderPro;
+        return orderProductRepo.getAllProductById(orderId);
     }
-    
+
 }
