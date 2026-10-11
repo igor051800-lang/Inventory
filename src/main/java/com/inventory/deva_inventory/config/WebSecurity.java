@@ -7,22 +7,20 @@ package com.inventory.deva_inventory.config;
 import com.inventory.deva_inventory.filter.CustomAuthenticationFilter;
 //import com.inventory.deva_inventory.filter.CustomAuthorizationFilter;
 import java.util.Arrays;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.SecurityFilterChain;
+//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,29 +31,30 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
-public class WebSecurity extends WebSecurityConfigurerAdapter {
+public class WebSecurity {
 
-    @Autowired
-    @Qualifier("userDetailService")
-    private UserDetailsService onUserDetailsService;
-
-    @Autowired
-    private PasswordEncoder encoder;
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-        auth.userDetailsService(onUserDetailsService).passwordEncoder(encoder);
-
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(
+            @Qualifier("userDetailService") UserDetailsService userDetailsService,
+            PasswordEncoder encoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(encoder);
+        return provider;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter customAuthentication = new CustomAuthenticationFilter(authenticationManagerBean());
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+        CustomAuthenticationFilter customAuthentication = new CustomAuthenticationFilter(authenticationManager);
         customAuthentication.setFilterProcessesUrl("/api/login");
-        http.cors()
-                .configurationSource(corsConfigurationSource()).and().csrf().disable();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable);
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 //            http.authorizeRequests().antMatchers("/api/login/**","/api/roles/***").permitAll();
 //            http.authorizeRequests().antMatchers(GET,"/api/courses/**").permitAll();
 //            http.authorizeRequests().antMatchers("/api/checktoken/**").permitAll();
@@ -67,15 +66,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 //     http.authorizeRequests().antMatchers(POST,"/api/requests/approve/**").hasAnyAuthority("Admin");
 //               http.authorizeRequests().antMatchers(POST,"/api/users/**").hasAnyAuthority("ADMIN");
-        http.authorizeRequests().anyRequest().permitAll();
+        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         http.addFilter(customAuthentication);
 //           http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+        return http.build();
     }
 
     @Bean

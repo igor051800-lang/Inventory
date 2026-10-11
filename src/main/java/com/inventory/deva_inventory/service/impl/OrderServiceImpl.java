@@ -27,7 +27,7 @@ public class OrderServiceImpl implements OrderService{
     public Order saveOrder(Integer supplierId,Order order) {
         Supplier  sup =null;
         try {
-            sup = supplierRepo.getById(supplierId);
+            sup = supplierRepo.getReferenceById(supplierId);
             System.out.print(sup.getSupplierName());
                order.setSupplier(sup);
 //               sup.getOrder().setSupplier(sup);
@@ -50,7 +50,7 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public Order editOrder(Integer orderId, Order order) {
-        Order or = orderRepo.getById(orderId);
+        Order or = orderRepo.getReferenceById(orderId);
         
         try {
              or.setOrderName(order.getOrderName());
