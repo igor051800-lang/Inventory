@@ -60,12 +60,12 @@ public class ProductServiceImpl implements ProductService{
         
         try {
             Date date = new Date();
-            suppliedProduct = supProductRepository.getById(suppliedProductId);
+            suppliedProduct = supProductRepository.getReferenceById(suppliedProductId);
             suppliedProduct.setSuppliedProductStatus("recieved");
             suppliedProduct = supProductRepository.save(suppliedProduct);
-            cat = catRepo.getById(categoryId);
-            brand = brandRepo.getById(brandId);
-            sup = supplierRepo.getById(supplierId);
+            cat = catRepo.getReferenceById(categoryId);
+            brand = brandRepo.getReferenceById(brandId);
+            sup = supplierRepo.getReferenceById(supplierId);
             product.setSupProduct(suppliedProduct);
             product.setRecievedDate(date);
             product.setSupplier(sup);
@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService{
       Product prod =null;
         try {
             Date date  = new Date();
-            prod = productRepo.getById(productId);
+            prod = productRepo.getReferenceById(productId);
             prod.setProductNumber(product.getProductNumber());
             prod.setProductName(product.getProductName());
             prod.setProductQuantity(product.getProductQuantity());
@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService{
             Inventory inv =null;
         try {
             inv = invRepo.getInventoryByInventoryCode(inventoryCode);
-            pro = productRepo.getById(productId);
+            pro = productRepo.getReferenceById(productId);
             pro.setInventory(inv);
             pro.setStockStatus("stocked");
             pro = productRepo.save(pro);

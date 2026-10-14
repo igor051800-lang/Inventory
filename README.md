@@ -24,9 +24,9 @@
 
 ## Built With
 
-- Spring Boot
-- Hibernate
-- Spring Security
+- Spring Boot 3.3
+- Hibernate 6
+- Spring Security 6
 - Mysql
 - Maven
 
@@ -36,16 +36,17 @@ To get the copy of this project in your computer,clone this repository or just d
 
 ### Prerequisites
 
-- Java Installed
-- Mysql installed
-- Java 8
+- Java 21 (JDK 21)
+- Maven 3.6.3+
+- MySQL 8 installed
 
 ### Setup
 
 - Download or clone the repository
 - Open the folder in your IDE
 - Install the dependencies
-- Run the app
+- Run the app: `mvn spring-boot:run` (expects MySQL on `localhost:3306`, database `deva_inventory`, see `src/main/resources/application.properties`)
+- Run the tests: `mvn clean verify` (uses an in-memory H2 database, no MySQL needed)
 
 ## Authors
 
