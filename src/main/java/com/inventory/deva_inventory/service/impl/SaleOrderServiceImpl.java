@@ -22,7 +22,7 @@ public class SaleOrderServiceImpl implements SaleOrderService{
     public SaleOrder saveSaleOrder(Integer orderId, SaleOrder saleOrder) {
           Order order = null;
         try {
-             order = orderRepository.getById(orderId);
+             order = orderRepository.getReferenceById(orderId);
              order.setOrderStatus("supplier_spproved");
              order = orderRepository.save(order);
              saleOrder.setOrder(order);
