@@ -44,7 +44,7 @@ private PasswordEncoder encoder;
 
     @Override
     public Supplier updateSupplier(Integer supId, Supplier sup) {
-          Supplier supplier = supRepo.getById(supId);
+          Supplier supplier = supRepo.getReferenceById(supId);
         try {
           
             supplier.setSupplierName(sup.getSupplierName());
@@ -83,7 +83,7 @@ private PasswordEncoder encoder;
 
     @Override
     public Supplier changeSupplierStatus(Integer supId, String supplierStatus) {
-        Supplier sup = supRepo.getById(supId);
+        Supplier sup = supRepo.getReferenceById(supId);
         try {
             sup.setSupplierStatus(supplierStatus);
             sup = supRepo.save(sup);
@@ -99,7 +99,7 @@ private PasswordEncoder encoder;
         Role role =null;
         User user =new User();
         try {
-            supplier = supRepo.getById(supId);
+            supplier = supRepo.getReferenceById(supId);
             role = roleRepo.findByRoleName("Supplier");
             supplier.setSupplierStatus("approved");
             supplier = supRepo.save(supplier);
@@ -118,7 +118,7 @@ private PasswordEncoder encoder;
     public Supplier declineSupplier(Integer supId) {
        Supplier sup =null;
         try {
-            sup = supRepo.getById(supId);
+            sup = supRepo.getReferenceById(supId);
             sup.setSupplierStatus("decline");
             sup = supRepo.save(sup);
         } catch (Exception e) {
