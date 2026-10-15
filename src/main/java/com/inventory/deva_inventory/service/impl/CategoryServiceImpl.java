@@ -77,7 +77,7 @@ return catList;
         Category updatedCat = null;
         try {
           Category  cat;
-            cat = catRepo.getById(catId);
+            cat = catRepo.getReferenceById(catId);
 
             System.out.println(cat.getCategoryId() + " data " + cat.getCategoryName());
  

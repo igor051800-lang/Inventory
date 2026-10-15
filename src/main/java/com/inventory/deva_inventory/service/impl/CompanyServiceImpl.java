@@ -39,7 +39,7 @@ public class CompanyServiceImpl implements CompanyService{
        Company comp = null;
         try {
           Company  comp1 =null;
-                  comp1= compRepo.getById(companyId);
+                  comp1= compRepo.getReferenceById(companyId);
               comp1.setCompanyName(compData.getCompanyName());
               comp1.setEmail(compData.getEmail());
               comp1.setPhone1(compData.getPhone1());

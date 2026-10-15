@@ -28,7 +28,7 @@ public class StoreServiceImpl implements StoreService{
     public Store saveStore(Integer companyId,Store storeData) {
       
         try {
-            Company comp = compRepo.getById(companyId);
+            Company comp = compRepo.getReferenceById(companyId);
          
 //            
                storeData.setCompany(comp);
@@ -44,7 +44,7 @@ public class StoreServiceImpl implements StoreService{
         Store updateStore =null;
         try {
             Store store=null;
-            store = storeRepo.getById(storeId);
+            store = storeRepo.getReferenceById(storeId);
             store.setStoreName(storeData.getStoreName());
             store.setStoreSize(storeData.getStoreSize());
             store.setBuilding(storeData.getBuilding());
